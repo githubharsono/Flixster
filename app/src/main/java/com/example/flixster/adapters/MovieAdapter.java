@@ -1,26 +1,36 @@
 package com.example.flixster.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.flixster.DetailActivity;
 import com.example.flixster.R;
 import com.example.flixster.models.Movie;
 
 import org.jetbrains.annotations.NotNull;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
+/* The MovieAdapter class contains the ViewHolder which holds references to each element in the
+RecyclerView, or each movie in the list
+ */
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
 
     Context context;
@@ -31,7 +41,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
         this.movies = movies;
     }
 
-    // will inflate the layout and return layout inside a ViewHolder
+    // will inflate the layout from XML and return layout inside a ViewHolder
     @NonNull
     @NotNull
     @Override
@@ -62,6 +72,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
     // the ViewHolder is a representation each row (element) in the RecyclerView
     public class ViewHolder extends RecyclerView.ViewHolder{
 
+        RelativeLayout container;
         TextView tvTitle;
         TextView tvOverview;
         ImageView ivPoster;
@@ -71,6 +82,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvOverview = itemView.findViewById(R.id.tvOverview);
             ivPoster = itemView.findViewById((R.id.ivPoster));
+            container = itemView.findViewById(R.id.container);
         }
 
         public void bind(Movie movie) {
@@ -87,7 +99,29 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder>{
             }
 
             // Glide is the library used to render remote images since Android cannot natively do it
-            Glide.with(context).load(imageUrl).into(ivPoster);
+            // Glide.with(context).load(imageUrl).into(ivPoster); // default image loading, sharp corners
+
+            int radius = 30; // corner radius, the greater the more rounded
+            int margin = 10; // crop margin, 0 for corners with no crop
+            Glide.with(context).load(imageUrl).transform(new RoundedCornersTransformation(radius, margin)).into(ivPoster);
+
+
+            /* Goal 1: Register click listener for whole movie container
+            Goal 2: Navigate to a new activity upon tapping on movie container
+             */
+            container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Toast.makeText(context, movie.getTitle(), Toast.LENGTH_SHORT).show();
+                    // Toast is a small pop up near the bottom of the screen that demonstrates action
+
+                    Intent i = new Intent(context, DetailActivity.class); // target is DetailActivity
+
+                    i.putExtra("movie", Parcels.wrap(movie));
+
+                    context.startActivity(i);
+                }
+            });
         }
     }
 }
